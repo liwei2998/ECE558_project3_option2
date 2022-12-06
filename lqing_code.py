@@ -1,38 +1,18 @@
-import lineAnnotation 
+import utils
 import cv2
 import numpy as np
-
-def ortho(pts):
-    # compute orthocenter given 3 points
-    x1 = pts[0][0]; y1 = pts[0][1]
-    x2 = pts[1][0]; y2 = pts[1][1]
-    x3 = pts[2][0]; y3 = pts[2][1]
-    A1 = y2-y3; B1 = x3-x2
-    A2 = y1-y3; B2 = x3-x1
-    C1 = A1*y1-B1*x1; C2 = A2*y2-B2*x2
-    x = (A1*C2-A2*C1)/(A2*B1-A1*B2)
-    y = (B1*C2-B2*C1)/(A2*B1-A1*B2)
-    return np.array([x,y,1])
-
-def distanceP2L(pt,line_pt1,line_pt2):
-    # Return distance from point to line, using area
-    vec1 = line_pt1 - pt
-    vec2 = line_pt2 - pt
-    distance = np.abs(np.cross(vec1,vec2)) / np.linalg.norm(line_pt1-line_pt2)
-    return distance
-
-def footPoint(pt,pto,dis):
-    # Return foot point given one vertex, orthocenter and distance \
-    # from orthocenter to another edge.
-    direction = (pto-pt)/np.linalg.norm(pto-pt)
-    return pto+dis*direction
+import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
+    ########Preparation: instantiate helpful classes
+    hp = utils.helper()
+    la = utils.LineAnnotation()
+
     # Step 1: Image acquisition
     img = cv2.imread('box.jpg')
 
     # Step 2.1: Image annotation, choose lines either by diy or by default
-    la = lineAnnotation.LineAnnotation(img,style='default')
+    la.init(img,style='default')
     lines = la.draw_lines()
     img=la.draw_image()
     cv2.imshow('annotated image',img)
@@ -57,9 +37,9 @@ if __name__ == '__main__':
 
     # Step 2.3: Compute projection matrix
     # a) compute focal length f (Pythagoras) and intrisic matrix
-    orthocenter = ortho(vps)
-    dis = distanceP2L(orthocenter[:2],vps[1][:2],vps[2][:2])
-    fp = footPoint(vps[0][:2],orthocenter[:2],dis)
+    orthocenter = hp.ortho(vps)
+    dis = hp.distanceP2L(orthocenter[:2],vps[1][:2],vps[2][:2])
+    fp = hp.footPoint(vps[0][:2],orthocenter[:2],dis)
     f = np.sqrt(np.linalg.norm(fp-vps[1][:2])*np.linalg.norm(fp-vps[2][:2])-dis*dis)
     u0 = 320 # ideally u0 and v0 are located at the center
     v0 = 240
