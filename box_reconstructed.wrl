@@ -1,0 +1,95 @@
+#VRML V2.0 utf8
+  
+
+Shape{
+	appearance Appearance { 
+			texture ImageTexture { 
+				url "xy_texture_crop.png" 
+				repeatS FALSE
+				repeatT FALSE
+			}
+	}
+	geometry IndexedFaceSet {
+			coord Coordinate { point [0.0 0.0 9.4, 
+				 14.2 0.0 9.4,
+				 14.2 8.2 9.4,
+				 0.0 8.2 9.4
+				] }
+			coordIndex [0,1,2,3]
+
+			texCoord TextureCoordinate {point [0 0,1 0,1 1,0 1]}
+	}
+}
+Shape{
+	appearance Appearance { 
+			texture ImageTexture { 
+				url "yz_texture_crop.png" 
+				repeatS FALSE
+				repeatT FALSE
+			}
+	}
+	geometry IndexedFaceSet {
+			coord Coordinate { point [0.0 0.0 0.0, 
+				 0.0 8.2 0.0,
+				 0.0 8.2 9.4,
+				 0.0 0.0 9.4
+				] }
+			coordIndex [0,1,2,3]
+
+			texCoord TextureCoordinate {point [0 0,1 0,1 1,0 1]}
+	}
+}	
+Shape{
+	appearance Appearance { 
+			texture ImageTexture { 
+				url "zx_texture_crop.png" 
+				repeatS FALSE
+				repeatT FALSE
+			}
+	}
+	geometry IndexedFaceSet {
+			coord Coordinate { point [0.0 0.0 0.0, 
+				 14.2 0.0 0.0,
+				 14.2 0.0 9.4,
+				 0.0 0.0 9.4
+				] }
+			coordIndex [0,1,2,3]
+
+			texCoord TextureCoordinate {point [0 0,1 0,1 1,0 1]}
+	}
+}
+
+Shape {
+	appearance Appearance{
+		material Material { 
+			diffuseColor     0.03 0.91 0.87   #red=1, green=0, blue=0
+			specularColor    1 1 1	 #red=1, green=1, blue=1
+			transparency 0   # try values between 0 and 1
+			shininess 1      # shiny surface, try values between 0 and 1
+			}
+		}
+	geometry IndexedFaceSet {
+		coord Coordinate {
+                    point [
+				# front vertices
+				0.0   0.0   0.0,	#vertex 0
+				14.2  0.0   0.0,	#vertex 1
+				14.2  0.0   9.4,	#vertex 2
+				0.0   0.0   9.4,	#vertex 3
+				# back vertices
+				0.0    8.2   0.0,	#vertex 4
+				14.2   8.2   0.0,	#vertex 5
+				14.2   8.2   9.4,	#vertex 6
+				0.0    8.2   9.4,	#vertex 7
+                    ]
+                }
+		coordIndex [
+			#side xy
+			 0,  1,  5, 4, -1,
+			#side yz
+			 1,  5,  6, 2, -1,
+            #side zx
+             4,  5,  6,  7, -1,			 
+			]			
+	}
+}
