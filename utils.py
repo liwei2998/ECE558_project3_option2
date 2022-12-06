@@ -112,6 +112,11 @@ class LineDetector:
                 cv2.imshow('masked image',masked_img)
                 cv2.waitKey()
                 cv2.destroyAllWindows()
+        else:
+            masked_img = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
+            cv2.imshow('original image',masked_img)
+            cv2.waitKey()
+            cv2.destroyAllWindows()
 
         # b) Blur the image to de-noise
         kernel_size = 5
@@ -137,7 +142,6 @@ class LineDetector:
         cv2.destroyAllWindows()
 
         return lines     
-
 
     def color_filter(self):
         # This is to get HSV color from a given image, used for color filtering
@@ -174,7 +178,6 @@ class LineDetector:
                 break
         cv2.destroyAllWindows()
         result = cv2.cvtColor(frame,cv2.COLOR_HSV2BGR)
-        print ('\n mask shape',mask.shape)
         return mask
 
 if __name__ == '__main__':
@@ -185,7 +188,8 @@ if __name__ == '__main__':
     ###LineDetector
     lsd = LineDetector()
     lsd.init(img)
-    # lsd.color_filter()
-    lsd.detect(self_adjust=True)
+    lsd.detect(mask_on=False,self_adjust=False) # original image
+    # lsd.detect(self_adjust=False) # masked image with default mask
+    # lsd.detect(self_adjust=True) # masked image with self-adjusted mask
 
 
