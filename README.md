@@ -10,5 +10,4 @@ pip install -r requirements.txt
 
 ## Step 1. Image acquisition.
 Take a photo by yourself following the guide of 3-point perspective image as input.
-'Box perspective image'
-(box.jpg)
+!(box.jpg)
