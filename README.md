@@ -24,7 +24,7 @@ However, the baskground introduces a lot of noisy lines. To reduce the influence
 ![default_mask](./result images/line_detector/masked_image_default.png)
 The results of canny and Hough line are much better dur to the mask.
 'Canny edge detection'
-![canny_detection](./result images/line_detector/canny_masked_default.png)
+![canny_detection](result images/line_detector/canny_masked_default.png)
 'HoughLine Transformation'
 ![houghline_detection](./result images/line_detector/houghline_masked_default.png)
 
