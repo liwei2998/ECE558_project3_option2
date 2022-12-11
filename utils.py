@@ -274,6 +274,16 @@ class VanishingPoint:
         b = -lines[:, 2]
         est_model = np.linalg.lstsq(a, b)[0]
         return np.concatenate((est_model, [1.]))
+    
+    def remove_inliers(self, model, edgelets, threshold_inlier=10):
+    #Remove all inlier edglets of a given model.
+        inliers = self.compute_votes(edgelets, model, 10) > 0
+        locations, directions, strengths = edgelets
+        locations = locations[~inliers]
+        directions = directions[~inliers]
+        strengths = strengths[~inliers]
+        edgelets = (locations, directions, strengths)
+        return edgelets
 
     def vis_edgelets(self, image, edgelets, show=True):
         #Helper function to visualize edgelets
@@ -319,13 +329,21 @@ if __name__ == '__main__':
     ###LineDetector
     lsd = LineDetector()
     image = lsd.init(img)
-    lines = lsd.detect(mask_on=False,self_adjust=False) # original image
-    # lsd.detect(self_adjust=False) # masked image with default mask
-    # lsd.detect(self_adjust=True) # masked image with self-adjusted mask
+    #lines = lsd.detect(mask_on=False,self_adjust=False) # original image
+    lines = lsd.detect(self_adjust=False) # masked image with default mask
+    #lines = lsd.detect(self_adjust=True) # masked image with self-adjusted mask
     vp = VanishingPoint()
-    edgelets = vp.compute_edgelets(lines)
-    best_model = vp.ransac_vanishing_point(edgelets)
-    final_model = vp.reestimate_model(best_model, edgelets)
-    vp.vis_model(image, edgelets, final_model, show = True)
+    edgelets1 = vp.compute_edgelets(lines)
+    vp1 = vp.ransac_vanishing_point(edgelets1)
+    vp1 = vp.reestimate_model(vp1, edgelets1)
+    vp.vis_model(image, edgelets1, vp1)
+    
+    edgelets2 = vp.remove_inliers(vp1, edgelets1, 10)
+    vp2 = vp.ransac_vanishing_point(edgelets2, num_ransac_iter=2000,threshold_inlier=5)
+    vp2 = vp.reestimate_model(vp2, edgelets2, threshold_reestimate=5)
+    vp.vis_model(image, edgelets2, vp2) # Visualize the vanishing point model
 
-
+    edgelets3 = vp.remove_inliers(vp2, edgelets2, 10)
+    vp3 = vp.ransac_vanishing_point(edgelets3, num_ransac_iter=2000,threshold_inlier=5)
+    vp3= vp.reestimate_model(vp3, edgelets3, threshold_reestimate=5)
+    vp.vis_model(image, edgelets3, vp3) # Visualize the vanishing point model
