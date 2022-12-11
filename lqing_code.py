@@ -1,17 +1,19 @@
 import utils
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
+import os
+os.system('cls')
 
 if __name__ == '__main__':
     ########Preparation: instantiate helpful classes
     hp = utils.helper()
-    la = utils.LineAnnotation()
+    
 
     # Step 1: Image acquisition
     img = cv2.imread('box.jpg')
-
+    
     # Step 2.1: Image annotation, choose lines either by diy or by default
+    la = utils.LineAnnotation()
     la.init(img,style='default')
     lines = la.draw_lines()
     img=la.draw_image()
@@ -21,20 +23,41 @@ if __name__ == '__main__':
     lines = np.array(lines)
     lines = lines[[0,3,1,4,2,5],:] # permutation, 0-2: red, 2-4:green, 4-6:blue
 
-    # Step 2.2: Compute vanishing points
+    # # Step 2.2: Compute vanishing points
+    # vps = []
+    # for i in range(0,len(lines),2):
+    #     e11 = np.append(lines[i][0],1)
+    #     e12 = np.append(lines[i][1],1)
+    #     l1 = np.cross(e11,e12)
+    #     e21 = np.append(lines[i+1][0],1)
+    #     e22 = np.append(lines[i+1][1],1)
+    #     l2 = np.cross(e21,e22)    
+    #     vp = np.cross(l1,l2)
+    #     vp = vp/vp[2]
+    #     vps.append(vp)
+    # vps = np.array(vps)
+    
+    #Step 2.2: Compute vanishing point using LSD and RANSAC
     vps = []
-    for i in range(0,len(lines),2):
-        e11 = np.append(lines[i][0],1)
-        e12 = np.append(lines[i][1],1)
-        l1 = np.cross(e11,e12)
-        e21 = np.append(lines[i+1][0],1)
-        e22 = np.append(lines[i+1][1],1)
-        l2 = np.cross(e21,e22)    
-        vp = np.cross(l1,l2)
-        vp = vp/vp[2]
-        vps.append(vp)
+    lsd = utils.LineDetector()
+    image = lsd.init(img)
+    #detect_lines = lsd.detect(mask_on=False,self_adjust=False) # original image
+    detect_lines = lsd.detect(self_adjust=False) # masked image with default mask
+    #detect_lines = lsd.detect(self_adjust=True) # masked image with self-adjusted mask
+    vp = utils.VanishingPoint()
+    edgelets = vp.compute_edgelets(detect_lines)
+    model = vp.ransac_vanishing_point(edgelets,20)
+    model = vp.reestimate_model(model, edgelets,20)
+    vp.vis_model(image, edgelets, model, show = True)
+    vps.append(model)
+    for i in range(2):
+        edgelets = vp.remove_inliers(model, edgelets,20)
+        model = vp.ransac_vanishing_point(edgelets,20)
+        model = vp.reestimate_model(model, edgelets, 20)
+        vp.vis_model(image, edgelets, model)
+        vps.append(model)
     vps = np.array(vps)
-
+    
     # Step 2.3: Compute projection matrix
     # a) compute focal length f (Pythagoras) and intrisic matrix
     orthocenter = hp.ortho(vps)
@@ -57,7 +80,9 @@ if __name__ == '__main__':
 
     # c) compute translation matrix
     ow = np.array([0,0,0,1]) #origin in world coordinate
-    oc = np.array([259.3,406.7,1.]) #origin in image coordinate
+    # oc = (lines[0][0]+lines[2][0]+lines[4][0])/3 #origin in image coordinate
+    # oc = np.append(oc,1.0)
+    oc = np.array([259.3, 406.7, 1])
     t_eq1 = np.dot(np.linalg.inv(K),oc.reshape(3,1)) #t_eq1=[t1/t3,t2/t3,1]
     # The most tricky part, scale pw to make projected picture looks nicer.
     pw = np.array([240,0,0,1]) #point in world coordinate (14.2 is the length of the box)
@@ -96,11 +121,3 @@ if __name__ == '__main__':
     cv2.imshow("texture image zx plane", img_zx)
     cv2.waitKey()
     cv2.destroyAllWindows()
-
-
-
-
-
-
-    
-
