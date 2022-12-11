@@ -112,12 +112,16 @@ if __name__ == '__main__':
     # transform from world to image. To transform from inage to world, we need to \
     # use the inverse homography matrix.
     img_xy = cv2.warpPerspective(src_img, np.linalg.inv(hxy), (cols, rows))
+
     cv2.imshow("texture image xy plane", img_xy)
+    cv2.imwrite('xy_texture_crop.png', img_xy)
     cv2.waitKey()
     img_yz = cv2.warpPerspective(src_img, np.linalg.inv(hyz), (cols, rows))
     cv2.imshow("texture image yz plane", img_yz)
+    cv2.imwrite('yz_texture_crop.png', img_yz)
     cv2.waitKey()
     img_zx = cv2.warpPerspective(src_img, np.linalg.inv(hzx), (cols, rows))
     cv2.imshow("texture image zx plane", img_zx)
+    cv2.imwrite('zx_texture_crop.png', img_zx)
     cv2.waitKey()
     cv2.destroyAllWindows()
