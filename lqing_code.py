@@ -1,40 +1,62 @@
 import utils
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     ########Preparation: instantiate helpful classes
     hp = utils.helper()
-    la = utils.LineAnnotation()
+    
 
     # Step 1: Image acquisition
     img = cv2.imread('box.jpg')
+    
+    # # Step 2.1: Image annotation, choose lines either by diy or by default
+    # la = utils.LineAnnotation()
+    # la.init(img,style='default')
+    # lines = la.draw_lines()
+    # img=la.draw_image()
+    # cv2.imshow('annotated image',img)
+    # cv2.waitKey() # show the annotated image, press q to exit 
+    # cv2.destroyAllWindows()
+    # lines = np.array(lines)
+    # lines = lines[[0,3,1,4,2,5],:] # permutation, 0-2: red, 2-4:green, 4-6:blue
 
-    # Step 2.1: Image annotation, choose lines either by diy or by default
-    la.init(img,style='default')
-    lines = la.draw_lines()
-    img=la.draw_image()
-    cv2.imshow('annotated image',img)
-    cv2.waitKey() # show the annotated image, press q to exit 
-    cv2.destroyAllWindows()
-    lines = np.array(lines)
-    lines = lines[[0,3,1,4,2,5],:] # permutation, 0-2: red, 2-4:green, 4-6:blue
-
-    # Step 2.2: Compute vanishing points
+    # # Step 2.2: Compute vanishing points
+    # vps = []
+    # for i in range(0,len(lines),2):
+    #     e11 = np.append(lines[i][0],1)
+    #     e12 = np.append(lines[i][1],1)
+    #     l1 = np.cross(e11,e12)
+    #     e21 = np.append(lines[i+1][0],1)
+    #     e22 = np.append(lines[i+1][1],1)
+    #     l2 = np.cross(e21,e22)    
+    #     vp = np.cross(l1,l2)
+    #     vp = vp/vp[2]
+    #     vps.append(vp)
+    # vps = np.array(vps)
+    
+    # Step 2.2: Compute vanishing point using LSD and RANSAC
     vps = []
-    for i in range(0,len(lines),2):
-        e11 = np.append(lines[i][0],1)
-        e12 = np.append(lines[i][1],1)
-        l1 = np.cross(e11,e12)
-        e21 = np.append(lines[i+1][0],1)
-        e22 = np.append(lines[i+1][1],1)
-        l2 = np.cross(e21,e22)    
-        vp = np.cross(l1,l2)
-        vp = vp/vp[2]
-        vps.append(vp)
+    lsd = utils.LineDetector()
+    image = lsd.init(img)
+    lines = lsd.detect(mask_on=False,self_adjust=False) # original image
+    #lines = lsd.detect(self_adjust=False) # masked image with default mask
+    # lsd.detect(self_adjust=True) # masked image with self-adjusted mask
+    vp = utils.VanishingPoint()
+    edgelets = vp.compute_edgelets(lines)
+    model = vp.ransac_vanishing_point(edgelets)
+    model = vp.reestimate_model(model, edgelets)
+    vp.vis_model(image, edgelets, model, show = True)
+    vps.append(model)
+    for i in range(2):
+        edgelets = vp.remove_inliers(model, edgelets, 10)
+        model = vp.ransac_vanishing_point(edgelets)
+        model = vp.reestimate_model(model, edgelets)
+        vp.vis_model(image, edgelets, model)
+        vps.append(model)
     vps = np.array(vps)
-
+    lines = np.reshape(lines, (len(lines), len(lines[0])//2, len(lines[0])//2))
+    
     # Step 2.3: Compute projection matrix
     # a) compute focal length f (Pythagoras) and intrisic matrix
     orthocenter = hp.ortho(vps)
