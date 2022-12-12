@@ -8,23 +8,18 @@ detector (http://www.ipol.im/pub/art/2012/gjmr-lsd/ ) and the RANSAC algorithm. 
 pip install -r requirements.txt
 ```
 
-## Step 1. Image acquisition.
+## Image acquisition.
 Take a photo by yourself following the guide of 3-point perspective image as input.
-![box_perspective](box.jpg)
+![box_perspective](box.png)
 
-## Step 2.1 Line segment detection.
-Canny and HoughLine transformation are applied for line detection and transformation.
-![canny_detection](./result_images/line_detector/canny_unmasked.png)
-![houghline_detection](./result_images/line_detector/houghline_unmasked.png)
+## Color filtering mask
+An interface is wriiten for self-adjust the color mask.
+![mask_interface](./result_images/line_detector/mask_interface.gif)
 
-However, the baskground introduces a lot of noisy lines. To reduce the influence of the background, a mask is applied to filter colors in a given range. 
-
-![default_mask](./result_images/line_detector/masked_image_default.png)
-
+## Canny and Houghline detection results
 The results of canny and Hough line are much better dur to the mask.
 
 ![canny_detection](./result_images/line_detector/canny_masked_default.png)
 ![houghline_detection](./result_images/line_detector/houghline_masked_default.png)
 
-An interface is wriiten for self-adjust the color mask.
-![mask_interface](./result_images/line_detector/mask_interface.gif)
+## Final 3D reconstruction model
