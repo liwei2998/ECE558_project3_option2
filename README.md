@@ -23,3 +23,4 @@ The results of canny and Hough line are much better dur to the mask.
 ![houghline_detection](./result_images/line_detector/houghline_masked_default.png)
 
 ## Final 3D reconstruction model
+![houghline_detection](./result_images/3d_model.gif)
